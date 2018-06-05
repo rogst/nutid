@@ -56,16 +56,23 @@ func main() {
 	}
 
 	_, utcOffset := now.Zone()
+	utcOffset = utcOffset / 3600 // Convert offset from seconds to hours
 	if fi.Mode()&os.ModeNamedPipe != 0 {
 		// We got data over Stdin
 		scanner := bufio.NewScanner(os.Stdin)
 		for scanner.Scan() {
 			fmt.Println(string(re.ReplaceAllFunc(scanner.Bytes(), func(b []byte) []byte {
 				t := strings.Split(string(b), ":")
-				h, _ := strconv.Atoi(t[0])
-				h = h - utcOffset
+				h, err := strconv.Atoi(t[0])
+				if err != nil {
+					return b
+				}
+
+				h = h + utcOffset
 				if h < 0 {
 					h = h + 24
+				} else if h > 23 {
+					h = h - 24
 				}
 
 				return []byte(fmt.Sprintf(outputTmpl, h, t[1], t[2]))
