@@ -12,11 +12,16 @@ import (
 	"time"
 )
 
+var (
+	version = "v0.1.0"
+)
+
 // Config holds cmdline parameters etc
 type Config struct {
 	Unix     uint64
 	Add      time.Duration
 	NoColors bool
+	Version  bool
 }
 
 // RegisterFlags loads cmdline params into config
@@ -24,12 +29,18 @@ func (c *Config) RegisterFlags(f *flag.FlagSet) {
 	f.Uint64Var(&c.Unix, "unix", 0, "Convert Unix timestamp")
 	f.DurationVar(&c.Add, "add", 0, "Add time duration")
 	f.BoolVar(&c.NoColors, "no-colors", false, "Disable coloring of time")
+	f.BoolVar(&c.Version, "version", false, "Show version")
 }
 
 func main() {
 	var config Config
 	config.RegisterFlags(flag.CommandLine)
 	flag.Parse()
+
+	if config.Version {
+		fmt.Println("Version:", version)
+		return
+	}
 
 	now := time.Now()
 	if config.Unix > 0 {
